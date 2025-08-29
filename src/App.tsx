@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthPage } from './components/Auth/AuthPage';
 import { Navbar } from './components/Layout/Navbar';
 import { Footer } from './components/Layout/Footer';
 import { Dashboard } from './components/Dashboard/Dashboard';
@@ -7,104 +9,239 @@ import { AddTask } from './components/Tasks/AddTask';
 import { ResourceManager } from './components/Resources/ResourceManager';
 import { Insights } from './components/Insights/Insights';
 import { History } from './components/History/History';
-import { loadData, saveData } from './utils/storage';
-import { User, Resource, Task, Award } from './types';
+import { ProfileSettings } from './components/Auth/ProfileSettings';
+import { dataService } from './lib/dataService';
+import { Database } from './lib/supabase';
 import { checkAwards } from './utils/awards';
-export function App() {
-  const [user, setUser] = useState<User>(() => {
-    const savedUser = loadData('user');
-    return savedUser || {
-      id: '1',
-      name: 'Ranch Owner',
-      location: 'Texas Ranch'
-    };
-  });
-  const [resources, setResources] = useState<Resource[]>(() => {
-    const savedResources = loadData('resources');
-    return savedResources || [{
-      id: '1',
-      type: 'animal',
-      name: 'Cattle',
-      quantity: 120,
-      status: 'active'
-    }, {
-      id: '2',
-      type: 'field',
-      name: 'North Pasture',
-      quantity: 1,
-      status: 'active'
-    }, {
-      id: '3',
-      type: 'equipment',
-      name: 'Main Tractor',
-      quantity: 1,
-      status: 'active'
-    }, {
-      id: '4',
-      type: 'feed',
-      name: 'Hay Bales',
-      quantity: 45,
-      status: 'active'
-    }];
-  });
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const savedTasks = loadData('tasks');
-    return savedTasks || [];
-  });
-  const [awards, setAwards] = useState<Award[]>(() => {
-    const savedAwards = loadData('awards');
-    return savedAwards || [];
-  });
-  // Save data whenever state changes
+import { Loader2Icon } from 'lucide-react';
+
+type Resource = Database['public']['Tables']['resources']['Row'];
+type Task = Database['public']['Tables']['tasks']['Row'];
+type Award = Database['public']['Tables']['awards']['Row'];
+function AppContent() {
+  const { user, loading } = useAuth();
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load user data when user is authenticated
   useEffect(() => {
-    saveData('user', user);
-    saveData('resources', resources);
-    saveData('tasks', tasks);
-    saveData('awards', awards);
-  }, [user, resources, tasks, awards]);
+    if (user) {
+      loadUserData();
+    } else {
+      setResources([]);
+      setTasks([]);
+      setAwards([]);
+      setDataLoading(false);
+    }
+  }, [user]);
+
+  const loadUserData = async () => {
+    if (!user) return;
+    
+    setDataLoading(true);
+    setError(null);
+    try {
+      // Load resources, tasks, and awards in parallel
+      const [resourcesResult, tasksResult, awardsResult] = await Promise.all([
+        dataService.resources.getAll(user.id),
+        dataService.tasks.getAll(user.id),
+        dataService.awards.getAll(user.id)
+      ]);
+
+      if (resourcesResult.error) {
+        console.error('Error loading resources:', resourcesResult.error);
+        setError('Failed to load resources');
+      } else if (resourcesResult.data) {
+        setResources(resourcesResult.data);
+      }
+
+      if (tasksResult.error) {
+        console.error('Error loading tasks:', tasksResult.error);
+        setError('Failed to load tasks');
+      } else if (tasksResult.data) {
+        setTasks(tasksResult.data);
+      }
+
+      if (awardsResult.error) {
+        console.error('Error loading awards:', awardsResult.error);
+        setError('Failed to load awards');
+      } else if (awardsResult.data) {
+        setAwards(awardsResult.data);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      setError('Failed to load farm data');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
   // Check for new awards whenever tasks change
   useEffect(() => {
-    const newAwards = checkAwards(tasks, awards);
-    if (newAwards.length > 0) {
-      setAwards([...awards, ...newAwards]);
+    if (user && tasks.length > 0) {
+      const newAwards = checkAwards(tasks, awards);
+      if (newAwards.length > 0) {
+        // Save new awards to database
+        newAwards.forEach(async (award) => {
+          try {
+            const result = await dataService.awards.create({
+              user_id: user.id,
+              label: award.label,
+              reason: award.reason,
+              earned_ts: award.earned_ts
+            });
+            if (result.error) {
+              console.error('Error creating award:', result.error);
+            }
+          } catch (error) {
+            console.error('Error creating award:', error);
+          }
+        });
+        setAwards([...awards, ...newAwards]);
+      }
     }
-  }, [tasks]);
-  const addTask = (task: Omit<Task, 'id' | 'ts'>) => {
-    const newTask = {
-      ...task,
-      id: Date.now().toString(),
-      ts: Date.now()
-    };
-    // Update resources if needed (e.g., reduce feed quantity when logging feeding)
-    if (task.type === 'feeding' && task.resource_id && task.qty) {
-      setResources(resources.map(resource => resource.id === task.resource_id && resource.type === 'feed' ? {
-        ...resource,
-        quantity: (resource.quantity || 0) - task.qty!
-      } : resource));
+  }, [tasks, user, awards]);
+
+  const addTask = async (taskData: Omit<Task, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!user) return;
+
+    try {
+      const newTask = {
+        ...taskData,
+        user_id: user.id,
+        ts: Date.now()
+      };
+
+      const result = await dataService.tasks.create(newTask);
+      if (result.error) {
+        console.error('Error creating task:', result.error);
+        throw new Error(result.error);
+      }
+      
+      if (result.data) {
+        setTasks([result.data, ...tasks]);
+        
+        // Update resources if needed (e.g., reduce feed quantity when logging feeding)
+        if (taskData.type === 'feeding' && taskData.resource_id && taskData.qty) {
+          const resource = resources.find(r => r.id === taskData.resource_id);
+          if (resource && resource.quantity) {
+            const updatedResource = {
+              ...resource,
+              quantity: resource.quantity - taskData.qty!
+            };
+            const updateResult = await dataService.resources.update(resource.id, updatedResource);
+            if (updateResult.data) {
+              setResources(resources.map(r => r.id === resource.id ? updateResult.data! : r));
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error adding task:', error);
+      throw error;
     }
-    setTasks([...tasks, newTask]);
   };
-  const addResource = (resource: Omit<Resource, 'id'>) => {
-    const newResource = {
-      ...resource,
-      id: Date.now().toString()
-    };
-    setResources([...resources, newResource]);
+
+  const addResource = async (resourceData: Omit<Resource, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!user) return;
+
+    try {
+      const newResource = {
+        ...resourceData,
+        user_id: user.id
+      };
+
+      const result = await dataService.resources.create(newResource);
+      if (result.error) {
+        console.error('Error creating resource:', result.error);
+        throw new Error(result.error);
+      }
+      
+      if (result.data) {
+        setResources([result.data, ...resources]);
+      }
+    } catch (error) {
+      console.error('Error adding resource:', error);
+      throw error;
+    }
   };
-  return <div className="min-h-screen bg-amber-50 flex flex-col">
-      <Router>
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2Icon className="animate-spin h-8 w-8 text-green-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authentication page if user is not authenticated
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  // Show loading screen while loading user data
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2Icon className="animate-spin h-8 w-8 text-green-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading your farm data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error screen if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <p className="font-medium">Error Loading Farm Data</p>
+            <p className="text-sm">{error}</p>
+          </div>
+          <button 
+            onClick={loadUserData}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <Router>
+      <div className="min-h-screen bg-amber-50 flex flex-col">
         <Navbar />
-        <main className="flex-grow p-4 container mx-auto max-w-md">
+        <main className="flex-grow p-4 container mx-auto max-w-md md:max-w-2xl lg:max-w-4xl">
           <Routes>
             <Route path="/" element={<Dashboard tasks={tasks} resources={resources} />} />
             <Route path="/task/add" element={<AddTask onAddTask={addTask} resources={resources} />} />
             <Route path="/resources" element={<ResourceManager resources={resources} onAddResource={addResource} />} />
             <Route path="/insights" element={<Insights tasks={tasks} resources={resources} awards={awards} />} />
             <Route path="/history" element={<History tasks={tasks} />} />
+            <Route path="/profile" element={<ProfileSettings />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
         <Footer />
-      </Router>
-    </div>;
+      </div>
+    </Router>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }
