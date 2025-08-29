@@ -10,6 +10,8 @@ import { ResourceManager } from './components/Resources/ResourceManager';
 import { Insights } from './components/Insights/Insights';
 import { History } from './components/History/History';
 import { ProfileSettings } from './components/Auth/ProfileSettings';
+import { Schedule } from './components/Schedule/Schedule';
+import { Collaborators } from './components/Collaborators/Collaborators';
 import { dataService } from './lib/dataService';
 import { Database } from './lib/supabase';
 import { checkAwards } from './utils/awards';
@@ -109,10 +111,17 @@ function AppContent() {
     if (!user) return;
 
     try {
+      // Convert frontend Task type to database TaskInsert type
       const newTask = {
-        ...taskData,
         user_id: user.id,
-        ts: Date.now()
+        type: taskData.type,
+        resource_id: taskData.resource_id || null,
+        qty: taskData.qty || null,
+        notes: taskData.notes || null,
+        ts: Date.now(),
+        completed: taskData.completed || false,
+        image: taskData.image || null,
+        priority: taskData.priority || null
       };
 
       const result = await dataService.tasks.create(newTask);
@@ -149,9 +158,17 @@ function AppContent() {
     if (!user) return;
 
     try {
+      // Convert frontend Resource type to database ResourceInsert type
       const newResource = {
-        ...resourceData,
-        user_id: user.id
+        user_id: user.id,
+        type: resourceData.type,
+        name: resourceData.name,
+        quantity: resourceData.quantity || null,
+        status: resourceData.status || null,
+        health: resourceData.health || null,
+        last_checked: resourceData.lastChecked ? new Date(resourceData.lastChecked).toISOString() : null,
+        notes: resourceData.notes || null,
+        image: resourceData.image || null
       };
 
       const result = await dataService.resources.create(newResource);
@@ -226,6 +243,8 @@ function AppContent() {
             <Route path="/" element={<Dashboard tasks={tasks} resources={resources} />} />
             <Route path="/task/add" element={<AddTask onAddTask={addTask} resources={resources} />} />
             <Route path="/resources" element={<ResourceManager resources={resources} onAddResource={addResource} />} />
+            <Route path="/schedule" element={<Schedule tasks={tasks} onAddTask={addTask} />} />
+            <Route path="/collaborators" element={<Collaborators />} />
             <Route path="/insights" element={<Insights tasks={tasks} resources={resources} awards={awards} />} />
             <Route path="/history" element={<History tasks={tasks} />} />
             <Route path="/profile" element={<ProfileSettings />} />

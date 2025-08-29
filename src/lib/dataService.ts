@@ -13,12 +13,37 @@ type ResourceUpdate = Database['public']['Tables']['resources']['Update']
 type TaskUpdate = Database['public']['Tables']['tasks']['Update']
 type AwardUpdate = Database['public']['Tables']['awards']['Update']
 
+// Utility functions to convert between database and frontend types
+const convertResourceFromDB = (dbResource: Resource): any => ({
+  id: dbResource.id,
+  type: dbResource.type,
+  name: dbResource.name,
+  quantity: dbResource.quantity,
+  status: dbResource.status,
+  health: dbResource.health,
+  lastChecked: dbResource.last_checked ? new Date(dbResource.last_checked).getTime() : undefined,
+  notes: dbResource.notes,
+  image: dbResource.image
+});
+
+const convertTaskFromDB = (dbTask: Task): any => ({
+  id: dbTask.id,
+  type: dbTask.type,
+  resource_id: dbTask.resource_id,
+  qty: dbTask.qty,
+  notes: dbTask.notes,
+  ts: dbTask.ts,
+  completed: dbTask.completed,
+  image: dbTask.image,
+  priority: dbTask.priority
+});
+
 // Data service for managing farm data
 export const dataService = {
   // Resource management
   resources: {
     // Get all resources for a user
-    async getAll(userId: string): Promise<{ data: Resource[] | null; error: string | null }> {
+    async getAll(userId: string): Promise<{ data: any[] | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('resources')
@@ -26,14 +51,18 @@ export const dataService = {
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
 
-        return { data, error: error?.message || null }
+        if (data) {
+          const convertedData = data.map(convertResourceFromDB);
+          return { data: convertedData, error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch resources' }
       }
     },
 
     // Get a single resource by ID
-    async getById(id: string, userId: string): Promise<{ data: Resource | null; error: string | null }> {
+    async getById(id: string, userId: string): Promise<{ data: any | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('resources')
@@ -42,14 +71,17 @@ export const dataService = {
           .eq('user_id', userId)
           .single()
 
-        return { data, error: error?.message || null }
+        if (data) {
+          return { data: convertResourceFromDB(data), error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch resource' }
       }
     },
 
     // Create a new resource
-    async create(resource: ResourceInsert): Promise<{ data: Resource | null; error: string | null }> {
+    async create(resource: ResourceInsert): Promise<{ data: any | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('resources')
@@ -57,14 +89,17 @@ export const dataService = {
           .select()
           .single()
 
-        return { data, error: error?.message || null }
+        if (data) {
+          return { data: convertResourceFromDB(data), error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to create resource' }
       }
     },
 
     // Update an existing resource
-    async update(id: string, updates: ResourceUpdate): Promise<{ data: Resource | null; error: string | null }> {
+    async update(id: string, updates: ResourceUpdate): Promise<{ data: any | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('resources')
@@ -73,7 +108,10 @@ export const dataService = {
           .select()
           .single()
 
-        return { data, error: error?.message || null }
+        if (data) {
+          return { data: convertResourceFromDB(data), error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to update resource' }
       }
@@ -94,7 +132,7 @@ export const dataService = {
     },
 
     // Get resources by type
-    async getByType(userId: string, type: Resource['type']): Promise<{ data: Resource[] | null; error: string | null }> {
+    async getByType(userId: string, type: Resource['type']): Promise<{ data: any[] | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('resources')
@@ -103,7 +141,11 @@ export const dataService = {
           .eq('type', type)
           .order('created_at', { ascending: false })
 
-        return { data, error: error?.message || null }
+        if (data) {
+          const convertedData = data.map(convertResourceFromDB);
+          return { data: convertedData, error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch resources by type' }
       }
@@ -113,7 +155,7 @@ export const dataService = {
   // Task management
   tasks: {
     // Get all tasks for a user
-    async getAll(userId: string): Promise<{ data: Task[] | null; error: string | null }> {
+    async getAll(userId: string): Promise<{ data: any[] | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('tasks')
@@ -121,14 +163,18 @@ export const dataService = {
           .eq('user_id', userId)
           .order('ts', { ascending: false })
 
-        return { data, error: error?.message || null }
+        if (data) {
+          const convertedData = data.map(convertTaskFromDB);
+          return { data: convertedData, error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch tasks' }
       }
     },
 
     // Get tasks by date range
-    async getByDateRange(userId: string, startDate: Date, endDate: Date): Promise<{ data: Task[] | null; error: string | null }> {
+    async getByDateRange(userId: string, startDate: Date, endDate: Date): Promise<{ data: any[] | null; error: string | null }> {
       try {
         const startTs = startDate.getTime()
         const endTs = endDate.getTime()
@@ -141,14 +187,18 @@ export const dataService = {
           .lte('ts', endTs)
           .order('ts', { ascending: false })
 
-        return { data, error: error?.message || null }
+        if (data) {
+          const convertedData = data.map(convertTaskFromDB);
+          return { data: convertedData, error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch tasks by date range' }
       }
     },
 
     // Get today's tasks
-    async getTodaysTasks(userId: string): Promise<{ data: Task[] | null; error: string | null }> {
+    async getTodaysTasks(userId: string): Promise<{ data: any[] | null; error: string | null }> {
       const today = new Date()
       const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
       const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59)
@@ -157,7 +207,7 @@ export const dataService = {
     },
 
     // Get a single task by ID
-    async getById(id: string, userId: string): Promise<{ data: Task | null; error: string | null }> {
+    async getById(id: string, userId: string): Promise<{ data: any | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('tasks')
@@ -166,14 +216,17 @@ export const dataService = {
           .eq('user_id', userId)
           .single()
 
-        return { data, error: error?.message || null }
+        if (data) {
+          return { data: convertTaskFromDB(data), error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch task' }
       }
     },
 
     // Create a new task
-    async create(task: TaskInsert): Promise<{ data: Task | null; error: string | null }> {
+    async create(task: TaskInsert): Promise<{ data: any | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('tasks')
@@ -181,14 +234,17 @@ export const dataService = {
           .select()
           .single()
 
-        return { data, error: error?.message || null }
+        if (data) {
+          return { data: convertTaskFromDB(data), error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to create task' }
       }
     },
 
     // Update an existing task
-    async update(id: string, updates: TaskUpdate): Promise<{ data: Task | null; error: string | null }> {
+    async update(id: string, updates: TaskUpdate): Promise<{ data: any | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('tasks')
@@ -197,7 +253,10 @@ export const dataService = {
           .select()
           .single()
 
-        return { data, error: error?.message || null }
+        if (data) {
+          return { data: convertTaskFromDB(data), error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to update task' }
       }
@@ -218,12 +277,12 @@ export const dataService = {
     },
 
     // Mark task as completed
-    async markCompleted(id: string): Promise<{ data: Task | null; error: string | null }> {
+    async markCompleted(id: string): Promise<{ data: any | null; error: string | null }> {
       return this.update(id, { completed: true })
     },
 
     // Get tasks by type
-    async getByType(userId: string, type: Task['type']): Promise<{ data: Task[] | null; error: string | null }> {
+    async getByType(userId: string, type: Task['type']): Promise<{ data: any[] | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('tasks')
@@ -232,14 +291,18 @@ export const dataService = {
           .eq('type', type)
           .order('ts', { ascending: false })
 
-        return { data, error: error?.message || null }
+        if (data) {
+          const convertedData = data.map(convertTaskFromDB);
+          return { data: convertedData, error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch tasks by type' }
       }
     },
 
     // Get completed tasks
-    async getCompleted(userId: string): Promise<{ data: Task[] | null; error: string | null }> {
+    async getCompleted(userId: string): Promise<{ data: any[] | null; error: string | null }> {
       try {
         const { data, error } = await supabase
           .from('tasks')
@@ -248,7 +311,11 @@ export const dataService = {
           .eq('completed', true)
           .order('ts', { ascending: false })
 
-        return { data, error: error?.message || null }
+        if (data) {
+          const convertedData = data.map(convertTaskFromDB);
+          return { data: convertedData, error: error?.message || null }
+        }
+        return { data: null, error: error?.message || null }
       } catch (error) {
         return { data: null, error: 'Failed to fetch completed tasks' }
       }
@@ -382,4 +449,210 @@ export const dataService = {
       }
     },
   },
-}
+
+  // Collaboration management
+  collaborators: {
+    // Get all collaborators for the current user
+    async getAll(): Promise<{ data: any[] | null; error: string | null }> {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { data: null, error: 'User not authenticated' };
+
+        const { data, error } = await supabase
+          .from('collaborators')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to fetch collaborators' };
+      }
+    },
+
+    // Get collaborators for a specific farm (simplified - just return all for now)
+    async getByFarmId(farmId: string): Promise<{ data: any[] | null; error: string | null }> {
+      return this.getAll();
+    },
+
+    // Add a new collaborator
+    async add(collaborator: any): Promise<{ data: any | null; error: string | null }> {
+      try {
+        const { data, error } = await supabase
+          .from('collaborators')
+          .insert(collaborator)
+          .select()
+          .single();
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to add collaborator' };
+      }
+    },
+
+    // Remove a collaborator
+    async remove(id: string): Promise<{ error: string | null }> {
+      try {
+        const { error } = await supabase
+          .from('collaborators')
+          .delete()
+          .eq('id', id);
+
+        return { error: error?.message || null };
+      } catch (error) {
+        return { error: 'Failed to remove collaborator' };
+      }
+    },
+
+    // Update collaborator role
+    async updateRole(id: string, role: string): Promise<{ data: any | null; error: string | null }> {
+      try {
+        const { data, error } = await supabase
+          .from('collaborators')
+          .select()
+          .eq('id', id)
+          .single();
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to update collaborator role' };
+      }
+    }
+  },
+
+  invitations: {
+    // Get all invitations sent by the current user
+    async getAll(): Promise<{ data: any[] | null; error: string | null }> {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { data: null, error: 'User not authenticated' };
+
+        // Simplified query without any joins or complex conditions
+        const { data, error } = await supabase
+          .from('invitations')
+          .select('id, email, role, status, invited_at, expires_at, message')
+          .eq('invited_by', user.id)
+          .order('created_at', { ascending: false });
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to fetch invitations' };
+      }
+    },
+
+    // Get invitations sent to the current user's email
+    async getReceived(): Promise<{ data: any[] | null; error: string | null }> {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { data: null, error: 'User not authenticated' };
+
+        // Simplified query without any joins
+        const { data, error } = await supabase
+          .from('invitations')
+          .select('id, email, role, status, invited_at, expires_at, message')
+          .eq('email', user.email)
+          .order('created_at', { ascending: false });
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to fetch received invitations' };
+      }
+    },
+
+    // Send an invitation
+    async send(invitation: any): Promise<{ data: any | null; error: string | null }> {
+      try {
+        const { data, error } = await supabase
+          .from('invitations')
+          .insert(invitation)
+          .select()
+          .single();
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to send invitation' };
+      }
+    },
+
+    // Cancel an invitation
+    async cancel(id: string): Promise<{ error: string | null }> {
+      try {
+        const { error } = await supabase
+          .from('invitations')
+          .delete()
+          .eq('id', id);
+
+        return { error: error?.message || null };
+      } catch (error) {
+        return { error: 'Failed to cancel invitation' };
+      }
+    },
+
+    // Accept an invitation
+    async accept(id: string): Promise<{ data: any | null; error: string | null }> {
+      try {
+        // Use the database function to accept invitation
+        const { data, error } = await supabase
+          .rpc('accept_invitation_simple', { p_invitation_id: id });
+
+        if (error) {
+          return { data: null, error: error.message };
+        }
+
+        return { data, error: null };
+      } catch (error) {
+        return { data: null, error: 'Failed to accept invitation' };
+      }
+    }
+  },
+
+  farms: {
+    // Create a new farm
+    async create(farm: any): Promise<{ data: any | null; error: string | null }> {
+      try {
+        const { data, error } = await supabase
+          .from('farms')
+          .insert(farm)
+          .select()
+          .single();
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to create farm' };
+      }
+    },
+
+    // Get farms for the current user
+    async getAll(): Promise<{ data: any[] | null; error: string | null }> {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { data: null, error: 'User not authenticated' };
+
+        const { data, error } = await supabase
+          .from('farms')
+          .select('*')
+          .or(`owner_id.eq.${user.id},id.in.(select farm_id from collaborators where user_id = '${user.id}')`)
+          .order('created_at', { ascending: false });
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to fetch farms' };
+      }
+    },
+
+    // Get a single farm
+    async getById(id: string): Promise<{ data: any | null; error: string | null }> {
+      try {
+        const { data, error } = await supabase
+          .from('farms')
+          .select('id')
+          .eq('id', id)
+          .single();
+
+        return { data, error: error?.message || null };
+      } catch (error) {
+        return { data: null, error: 'Failed to fetch farm' };
+      }
+    }
+  }
+};
