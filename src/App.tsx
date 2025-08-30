@@ -187,6 +187,73 @@ function AppContent() {
     }
   };
 
+  const updateResource = async (resourceId: string, updates: Partial<Resource>) => {
+    if (!user) return;
+
+    try {
+      // Convert frontend Resource updates to database format
+      const updateData: any = {};
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.quantity !== undefined) updateData.quantity = updates.quantity;
+      if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.health !== undefined) updateData.health = updates.health;
+      if (updates.notes !== undefined) updateData.notes = updates.notes;
+      if (updates.image !== undefined) updateData.image = updates.image;
+      if (updates.lastChecked !== undefined) {
+        updateData.last_checked = new Date(updates.lastChecked).toISOString();
+      }
+
+      const result = await dataService.resources.update(resourceId, updateData);
+      if (result.error) {
+        console.error('Error updating resource:', result.error);
+        throw new Error(result.error);
+      }
+      
+      if (result.data) {
+        setResources(resources.map(r => r.id === resourceId ? result.data! : r));
+      }
+    } catch (error) {
+      console.error('Error updating resource:', error);
+      throw error;
+    }
+  };
+
+  const deleteResource = async (resourceId: string) => {
+    if (!user) return;
+
+    try {
+      const result = await dataService.resources.delete(resourceId);
+      if (result.error) {
+        console.error('Error deleting resource:', result.error);
+        throw new Error(result.error);
+      }
+      
+      setResources(resources.filter(r => r.id !== resourceId));
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+      throw error;
+    }
+  };
+
+  const completeTask = async (taskId: string) => {
+    if (!user) return;
+
+    try {
+      const result = await dataService.tasks.update(taskId, { completed: true });
+      if (result.error) {
+        console.error('Error completing task:', result.error);
+        throw new Error(result.error);
+      }
+      
+      if (result.data) {
+        setTasks(tasks.map(task => task.id === taskId ? result.data! : task));
+      }
+    } catch (error) {
+      console.error('Error completing task:', error);
+      throw error;
+    }
+  };
+
   // Show loading screen while checking authentication
   if (loading) {
     return (
@@ -241,9 +308,9 @@ function AppContent() {
         <Navbar />
         <main className="flex-grow p-4 container mx-auto max-w-md md:max-w-2xl lg:max-w-4xl">
           <Routes>
-            <Route path="/" element={<Dashboard tasks={tasks} resources={resources} />} />
+            <Route path="/" element={<Dashboard tasks={tasks} resources={resources} onCompleteTask={completeTask} />} />
             <Route path="/task/add" element={<AddTask onAddTask={addTask} resources={resources} />} />
-            <Route path="/resources" element={<ResourceManager resources={resources} onAddResource={addResource} />} />
+            <Route path="/resources" element={<ResourceManager resources={resources} onAddResource={addResource} onUpdateResource={updateResource} onDeleteResource={deleteResource} />} />
             <Route path="/schedule" element={<Schedule tasks={tasks} onAddTask={addTask} />} />
             <Route path="/collaborators" element={<Collaborators />} />
             <Route path="/insights" element={<Insights tasks={tasks} resources={resources} awards={awards} />} />

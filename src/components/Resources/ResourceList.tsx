@@ -36,6 +36,10 @@ export const ResourceList: React.FC<ResourceListProps> = ({
   };
   // Check if resource needs attention
   const needsAttention = (resource: Resource): boolean => {
+    // Fields and feed don't have health concerns like animals/equipment
+    if (resource.type === 'field' || resource.type === 'feed') {
+      return false;
+    }
     if (resource.type === 'equipment' && resource.status === 'needs_repair') {
       return true;
     }
@@ -76,16 +80,18 @@ export const ResourceList: React.FC<ResourceListProps> = ({
                   </p>}
               </div>
             </div>
-            {resource.health !== undefined && <div className="flex flex-col items-end">
+            {resource.health !== undefined && resource.type !== 'field' && resource.type !== 'feed' && (
+              <div className="flex flex-col items-end">
                 <div className={`text-xs font-medium ${resource.health >= 80 ? 'text-green-600' : resource.health >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
                   Health: {resource.health}%
                 </div>
                 <div className="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
                   <div className={`h-1.5 rounded-full ${resource.health >= 80 ? 'bg-green-500' : resource.health >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{
-              width: `${resource.health}%`
-            }}></div>
+                    width: `${resource.health}%`
+                  }}></div>
                 </div>
-              </div>}
+              </div>
+            )}
           </div>
         </div>)}
     </div>;

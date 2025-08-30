@@ -7,10 +7,14 @@ import { ResourceDetails } from './ResourceDetails';
 interface ResourceManagerProps {
   resources: Resource[];
   onAddResource: (resource: Omit<Resource, 'id'>) => void;
+  onUpdateResource: (resourceId: string, updates: Partial<Resource>) => void;
+  onDeleteResource: (resourceId: string) => void;
 }
 export const ResourceManager: React.FC<ResourceManagerProps> = ({
   resources,
-  onAddResource
+  onAddResource,
+  onUpdateResource,
+  onDeleteResource
 }) => {
   const [activeTab, setActiveTab] = useState<ResourceType>('animal');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -113,8 +117,15 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
         </div>}
 
       {/* Resource Details Modal */}
-      {selectedResource && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <ResourceDetails resource={selectedResource} onClose={() => setSelectedResource(null)} />
-        </div>}
+      {selectedResource && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <ResourceDetails 
+            resource={selectedResource} 
+            onClose={() => setSelectedResource(null)}
+            onUpdate={onUpdateResource}
+            onDelete={onDeleteResource}
+          />
+        </div>
+      )}
     </div>;
 };

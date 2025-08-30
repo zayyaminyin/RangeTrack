@@ -11,10 +11,12 @@ import { QuickActions } from './QuickActions';
 interface DashboardProps {
   tasks: Task[];
   resources: Resource[];
+  onCompleteTask: (taskId: string) => void;
 }
 export const Dashboard: React.FC<DashboardProps> = ({
   tasks,
-  resources
+  resources,
+  onCompleteTask
 }) => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [showWeatherForecast, setShowWeatherForecast] = useState(false);
@@ -127,7 +129,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             + Add Task
           </Link>
         </div>
-        <TaskList tasks={todaysTasks} resources={resources} />
+        <TaskList tasks={todaysTasks} resources={resources} onCompleteTask={onCompleteTask} />
         {todaysTasks.length === 0 && <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
             <p>No tasks logged today</p>
             <Link to="/task/add" className="inline-block mt-2 bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm">
@@ -179,10 +181,90 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Full Report
           </Link>
         </div>
-        <div className="bg-green-50 rounded-lg p-3 text-center">
-          <p className="text-sm text-green-800">
-            View your farm's performance metrics and insights
-          </p>
+        {/* Quick Analytics Summary */}
+        <div className="space-y-3">
+          {/* Task Completion Rate */}
+          <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-green-800">Task Completion</p>
+              <p className="text-xs text-green-600">Last 7 days</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-green-800">
+                {(() => {
+                  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                  const recentTasks = tasks.filter(task => task.ts >= oneWeekAgo);
+                  const completedTasks = recentTasks.filter(task => task.completed);
+                  return recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
+                })()}%
+              </p>
+              <div className="w-16 bg-green-200 rounded-full h-1.5 mt-1">
+                <div 
+                  className="bg-green-600 h-1.5 rounded-full" 
+                  style={{ 
+                    width: `${(() => {
+                      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                      const recentTasks = tasks.filter(task => task.ts >= oneWeekAgo);
+                      const completedTasks = recentTasks.filter(task => task.completed);
+                      return recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
+                    })()}%` 
+                  }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Feed Status */}
+          <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-amber-800">Feed Inventory</p>
+              <p className="text-xs text-amber-600">Days remaining</p>
+            </div>
+            <div className="text-right">
+              <p className={`text-lg font-bold ${feedDaysRemaining <= 7 ? 'text-red-600' : 'text-amber-800'}`}>
+                {feedDaysRemaining}
+              </p>
+              <p className="text-xs text-amber-600">days</p>
+            </div>
+          </div>
+
+          {/* Resource Health */}
+          <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-blue-800">Resource Health</p>
+              <p className="text-xs text-blue-600">Average condition</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-blue-800">
+                {(() => {
+                  const animals = resources.filter(r => r.type === 'animal' && r.health !== undefined);
+                  const equipment = resources.filter(r => r.type === 'equipment' && r.health !== undefined);
+                  const allWithHealth = [...animals, ...equipment];
+                  if (allWithHealth.length === 0) return 'N/A';
+                  const avgHealth = allWithHealth.reduce((sum, r) => sum + (r.health || 0), 0) / allWithHealth.length;
+                  return `${Math.round(avgHealth)}%`;
+                })()}
+              </p>
+              <p className="text-xs text-blue-600">animals & equipment</p>
+            </div>
+          </div>
+
+          {/* Activity Summary */}
+          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-purple-800">Recent Activity</p>
+              <p className="text-xs text-purple-600">Tasks this week</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-purple-800">
+                {(() => {
+                  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                  return tasks.filter(task => task.ts >= oneWeekAgo).length;
+                })()}
+              </p>
+              <p className="text-xs text-purple-600">tasks logged</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>;
