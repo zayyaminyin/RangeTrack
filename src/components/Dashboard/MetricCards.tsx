@@ -21,30 +21,39 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
     equipment: resourcesByType.equipment.length,
     feed: resourcesByType.feed.reduce((sum, r) => sum + (r.quantity || 0), 0)
   };
-  // Calculate health statuses
+  // Calculate property values for each resource type
   const animalHealth = calculateAverageHealth(resourcesByType.animal);
-  const equipmentHealth = calculateAverageHealth(resourcesByType.equipment);
+  const equipmentCondition = calculateAverageHealth(resourcesByType.equipment);
+  const fieldFertility = calculateAverageHealth(resourcesByType.field);
+  const feedQuality = calculateAverageHealth(resourcesByType.feed);
+  
   const metricCards = [{
     type: 'animal' as ResourceType,
     label: 'Animals',
     count: totalCounts.animal,
-    health: animalHealth,
+    propertyValue: animalHealth,
+    propertyLabel: 'Health',
     icon: <BirdIcon className="text-amber-600" size={20} />
   }, {
     type: 'field' as ResourceType,
     label: 'Fields',
     count: totalCounts.field,
+    propertyValue: fieldFertility,
+    propertyLabel: 'Fertility',
     icon: <TreesIcon className="text-green-600" size={20} />
   }, {
     type: 'equipment' as ResourceType,
     label: 'Equipment',
     count: totalCounts.equipment,
-    health: equipmentHealth,
+    propertyValue: equipmentCondition,
+    propertyLabel: 'Condition',
     icon: <TractorIcon className="text-yellow-600" size={20} />
   }, {
     type: 'feed' as ResourceType,
     label: 'Feed',
     count: totalCounts.feed,
+    propertyValue: feedQuality,
+    propertyLabel: 'Quality',
     icon: <WheatIcon className="text-amber-600" size={20} />
   }];
   return <div className="grid grid-cols-2 gap-3">
@@ -58,14 +67,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
               <p className="text-xl font-bold">{card.count}</p>
             </div>
           </div>
-          {card.health !== undefined && <div className="mt-2">
+          {card.propertyValue !== undefined && <div className="mt-2">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-gray-500">Health</span>
-                <span className="text-xs font-medium">{card.health}%</span>
+                <span className="text-xs text-gray-500">{card.propertyLabel}</span>
+                <span className="text-xs font-medium">{card.propertyValue}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div className={`h-1.5 rounded-full ${getHealthColor(card.health)}`} style={{
-            width: `${card.health}%`
+                <div className={`h-1.5 rounded-full ${getHealthColor(card.propertyValue)}`} style={{
+            width: `${card.propertyValue}%`
           }}></div>
               </div>
             </div>}

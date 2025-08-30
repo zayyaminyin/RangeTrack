@@ -239,9 +239,13 @@ function AppContent() {
     if (!user) return;
 
     try {
-      const result = await dataService.tasks.update(taskId, { completed: true });
+      // Find the current task to toggle its completion status
+      const currentTask = tasks.find(task => task.id === taskId);
+      if (!currentTask) return;
+
+      const result = await dataService.tasks.update(taskId, { completed: !currentTask.completed });
       if (result.error) {
-        console.error('Error completing task:', result.error);
+        console.error('Error updating task:', result.error);
         throw new Error(result.error);
       }
       
@@ -249,7 +253,7 @@ function AppContent() {
         setTasks(tasks.map(task => task.id === taskId ? result.data! : task));
       }
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error('Error updating task:', error);
       throw error;
     }
   };
