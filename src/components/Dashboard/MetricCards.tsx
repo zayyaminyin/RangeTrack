@@ -56,30 +56,42 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
     propertyLabel: 'Quality',
     icon: <WheatIcon className="text-amber-600" size={20} />
   }];
-  return <div className="grid grid-cols-2 gap-3">
-      {metricCards.map(card => <div key={card.type} className="bg-white rounded-lg shadow p-3">
-          <div className="flex items-center mb-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 mr-3">
-              {card.icon}
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {metricCards.map(card => (
+        <div key={card.type} className="card shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div className="card-body p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200">
+                {card.icon}
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-600 font-medium">{card.label}</p>
+                <p className="text-2xl font-bold text-gray-800">{card.count}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">{card.label}</p>
-              <p className="text-xl font-bold">{card.count}</p>
-            </div>
+            
+            {card.propertyValue !== undefined && (
+              <div className="mt-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-600 font-medium">{card.propertyLabel}</span>
+                  <span className={`text-sm font-bold ${getHealthColorText(card.propertyValue)}`}>
+                    {card.propertyValue}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all duration-500 ${getHealthColor(card.propertyValue)}`} 
+                    style={{ width: `${card.propertyValue}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
-          {card.propertyValue !== undefined && <div className="mt-2">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-gray-500">{card.propertyLabel}</span>
-                <span className="text-xs font-medium">{card.propertyValue}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div className={`h-1.5 rounded-full ${getHealthColor(card.propertyValue)}`} style={{
-            width: `${card.propertyValue}%`
-          }}></div>
-              </div>
-            </div>}
-        </div>)}
-    </div>;
+        </div>
+      ))}
+    </div>
+  );
 };
 // Helper function to calculate average health of resources
 const calculateAverageHealth = (resources: Resource[]): number | undefined => {
@@ -92,7 +104,14 @@ const calculateAverageHealth = (resources: Resource[]): number | undefined => {
 };
 // Helper function to get health indicator color
 const getHealthColor = (health: number): string => {
-  if (health >= 80) return 'bg-green-500';
-  if (health >= 60) return 'bg-yellow-500';
+  if (health >= 80) return 'bg-primary-500';
+  if (health >= 60) return 'bg-accent-500';
   return 'bg-red-500';
+};
+
+// Helper function to get health text color
+const getHealthColorText = (health: number): string => {
+  if (health >= 80) return 'text-primary-600';
+  if (health >= 60) return 'text-accent-600';
+  return 'text-red-600';
 };

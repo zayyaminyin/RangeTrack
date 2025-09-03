@@ -50,17 +50,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   };
   const feedDaysRemaining = calculateFeedDaysRemaining(tasks, resources);
-  return <div className="space-y-6 pb-16">
+  return (
+    <div className="space-y-6 pb-20 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-green-800">Daily Dashboard</h1>
-        <Link to="/task/add" className="bg-green-600 hover:bg-green-700 text-white rounded-full p-2">
+        <h1 className="text-3xl font-bold text-primary-800 tracking-tight">Daily Dashboard</h1>
+        <Link to="/task/add" className="btn-primary rounded-full p-3 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
           <PlusIcon size={24} />
         </Link>
       </div>
 
       {/* Weather Widget - Enhanced */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-green-50">
+      <div className="card shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="p-6 flex items-center justify-between bg-gradient-to-r from-blue-50 to-primary-50 backdrop-blur-sm">
           <div className="flex items-center">
             <div className="text-4xl mr-4">{getWeatherIcon()}</div>
             <div>
@@ -87,8 +88,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>}
         </div>
         {/* Expandable Weather Forecast */}
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
-          <button onClick={() => setShowWeatherForecast(!showWeatherForecast)} className="text-sm text-blue-600 flex items-center w-full justify-center">
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+          <button 
+            onClick={() => setShowWeatherForecast(!showWeatherForecast)} 
+            className="text-sm text-primary-600 hover:text-primary-700 flex items-center w-full justify-center transition-colors duration-200 font-medium"
+          >
             {showWeatherForecast ? 'Hide forecast' : 'Show 5-day forecast'}
           </button>
         </div>
@@ -99,175 +103,232 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <QuickActions />
 
       {/* Task Completion Progress */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-medium text-gray-700">Task Completion</h2>
-          <Link to="/history" className="text-xs text-green-600">
-            View all
-          </Link>
+      <div className="card shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="card-header">
+          <div className="flex justify-between items-center">
+            <h2 className="font-semibold text-gray-800">Task Completion Progress</h2>
+            <Link to="/history" className="text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200 font-medium">
+              View all →
+            </Link>
+          </div>
         </div>
-        <TaskCompletionChart tasks={tasks} />
+        <div className="card-body">
+          <TaskCompletionChart tasks={tasks} />
+        </div>
       </div>
 
       {/* Quick Insights */}
-      {feedDaysRemaining <= 14 && <div className={`rounded-lg p-4 ${feedDaysRemaining <= 7 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
-          <p className="font-medium">
-            {feedDaysRemaining === 0 ? '⚠️ Feed stock depleted!' : `⚠️ Feed stock will last ${feedDaysRemaining} more day${feedDaysRemaining !== 1 ? 's' : ''}`}
-          </p>
-        </div>}
+      {feedDaysRemaining <= 14 && (
+        <div className={`card shadow-md p-4 border-l-4 animate-slide-up ${
+          feedDaysRemaining <= 7 
+            ? 'bg-red-50 border-red-400 text-red-800' 
+            : 'bg-yellow-50 border-yellow-400 text-yellow-800'
+        }`}>
+          <div className="flex items-center">
+            <div className="text-2xl mr-3">⚠️</div>
+            <div>
+              <p className="font-semibold text-sm">
+                {feedDaysRemaining === 0 ? 'Feed Stock Alert' : 'Low Feed Stock Warning'}
+              </p>
+              <p className="text-xs mt-1">
+                {feedDaysRemaining === 0 
+                  ? 'Your feed stock is completely depleted!' 
+                  : `Feed stock will last ${feedDaysRemaining} more day${feedDaysRemaining !== 1 ? 's' : ''}`
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Metric Cards */}
       <MetricCards resources={resources} />
 
       {/* Today's Tasks */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold text-green-800">
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-primary-800 tracking-tight">
             Today's Tasks
           </h2>
-          <Link to="/task/add" className="text-green-600 text-sm">
+          <Link to="/task/add" className="btn-primary text-sm px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200">
             + Add Task
           </Link>
         </div>
-        <TaskList tasks={todaysTasks} resources={resources} onCompleteTask={onCompleteTask} />
-        {todaysTasks.length === 0 && <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
-            <p>No tasks logged today</p>
-            <Link to="/task/add" className="inline-block mt-2 bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm">
-              Log Your First Task
-            </Link>
-          </div>}
+        
+        {todaysTasks.length === 0 ? (
+          <div className="card shadow-md text-center">
+            <div className="card-body py-12">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">No tasks logged today</h3>
+              <p className="text-gray-600 mb-6">Start tracking your farm activities</p>
+              <Link to="/task/add" className="btn-primary shadow-md hover:shadow-lg transition-all duration-200">
+                Log Your First Task
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <TaskList tasks={todaysTasks} resources={resources} onCompleteTask={onCompleteTask} />
+        )}
       </div>
 
       {/* Upcoming Tasks */}
-      {upcomingTasks.length > 0 && <div>
-          <div className="flex items-center mb-2">
-            <CalendarIcon size={16} className="text-green-700 mr-2" />
-            <h2 className="text-lg font-semibold text-green-800">
+      {upcomingTasks.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <CalendarIcon size={20} className="text-primary-700 mr-3" />
+            <h2 className="text-2xl font-bold text-primary-800 tracking-tight">
               Upcoming Tasks
             </h2>
           </div>
-          <div className="bg-white rounded-lg shadow divide-y divide-gray-100">
-            {upcomingTasks.map(task => <div key={task.id} className="p-3">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="font-medium">
-                      {getTaskTypeEmoji(task.type)}{' '}
-                      {task.type.replace('_', ' ')}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(task.ts).toLocaleDateString(undefined, {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric'
-                })}
-                    </p>
+          <div className="card shadow-md divide-y divide-gray-100">
+            {upcomingTasks.map(task => (
+              <div key={task.id} className="p-4 hover:bg-gray-50 transition-colors duration-200">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{getTaskTypeEmoji(task.type)}</div>
+                    <div>
+                      <p className="font-semibold text-gray-800 capitalize">
+                        {task.type.replace('_', ' ')}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(task.ts).toLocaleDateString(undefined, {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <Link to={`/task/${task.id}`} className="text-xs text-green-600">
-                    View
+                  <Link 
+                    to={`/task/${task.id}`} 
+                    className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
+                  >
+                    View →
                   </Link>
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
-        </div>}
+        </div>
+      )}
 
       {/* Farm Analytics Preview */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center">
-            <BarChart3Icon size={18} className="text-green-700 mr-2" />
-            <h2 className="font-medium text-gray-700">Farm Analytics</h2>
-          </div>
-          <Link to="/insights" className="text-xs text-green-600">
-            Full Report
-          </Link>
-        </div>
-        {/* Quick Analytics Summary */}
-        <div className="space-y-3">
-          {/* Task Completion Rate */}
-          <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-            <div>
-              <p className="text-sm font-medium text-green-800">Task Completion</p>
-              <p className="text-xs text-green-600">Last 7 days</p>
+      <div className="card shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="card-header">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <BarChart3Icon size={22} className="text-primary-700 mr-3" />
+              <h2 className="text-xl font-bold text-gray-800">Farm Analytics</h2>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-green-800">
-                {(() => {
-                  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                  const recentTasks = tasks.filter(task => task.ts >= oneWeekAgo);
-                  const completedTasks = recentTasks.filter(task => task.completed);
-                  return recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
-                })()}%
-              </p>
-              <div className="w-16 bg-green-200 rounded-full h-1.5 mt-1">
-                <div 
-                  className="bg-green-600 h-1.5 rounded-full" 
-                  style={{ 
-                    width: `${(() => {
-                      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                      const recentTasks = tasks.filter(task => task.ts >= oneWeekAgo);
-                      const completedTasks = recentTasks.filter(task => task.completed);
-                      return recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
-                    })()}%` 
-                  }}
-                ></div>
+            <Link to="/insights" className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200">
+              Full Report →
+            </Link>
+          </div>
+        </div>
+        <div className="card-body">
+          {/* Quick Analytics Summary */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Task Completion Rate */}
+            <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-primary-800">Task Completion</p>
+                  <p className="text-xs text-primary-600">Last 7 days</p>
+                </div>
+                <div className="text-2xl">📊</div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-primary-800 mb-2">
+                  {(() => {
+                    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                    const recentTasks = tasks.filter(task => task.ts >= oneWeekAgo);
+                    const completedTasks = recentTasks.filter(task => task.completed);
+                    return recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
+                  })()}%
+                </p>
+                <div className="w-full bg-primary-200 rounded-full h-2">
+                  <div 
+                    className="bg-primary-600 h-2 rounded-full transition-all duration-500" 
+                    style={{ 
+                      width: `${(() => {
+                        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                        const recentTasks = tasks.filter(task => task.ts >= oneWeekAgo);
+                        const completedTasks = recentTasks.filter(task => task.completed);
+                        return recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
+                      })()}%` 
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Feed Status */}
-          <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-            <div>
-              <p className="text-sm font-medium text-amber-800">Feed Inventory</p>
-              <p className="text-xs text-amber-600">Days remaining</p>
+            {/* Feed Status */}
+            <div className="bg-gradient-to-r from-accent-50 to-accent-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-accent-800">Feed Inventory</p>
+                  <p className="text-xs text-accent-600">Days remaining</p>
+                </div>
+                <div className="text-2xl">🌾</div>
+              </div>
+              <div className="text-right">
+                <p className={`text-2xl font-bold mb-1 ${
+                  feedDaysRemaining <= 7 ? 'text-red-600' : 'text-accent-800'
+                }`}>
+                  {feedDaysRemaining}
+                </p>
+                <p className="text-xs text-accent-600">days left</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className={`text-lg font-bold ${feedDaysRemaining <= 7 ? 'text-red-600' : 'text-amber-800'}`}>
-                {feedDaysRemaining}
-              </p>
-              <p className="text-xs text-amber-600">days</p>
-            </div>
-          </div>
 
-          {/* Resource Health */}
-          <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-            <div>
-              <p className="text-sm font-medium text-blue-800">Resource Health</p>
-              <p className="text-xs text-blue-600">Average condition</p>
+            {/* Resource Health */}
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-blue-800">Resource Health</p>
+                  <p className="text-xs text-blue-600">Average condition</p>
+                </div>
+                <div className="text-2xl">🏥</div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-blue-800 mb-1">
+                  {(() => {
+                    const animals = resources.filter(r => r.type === 'animal' && r.health !== undefined);
+                    const equipment = resources.filter(r => r.type === 'equipment' && r.health !== undefined);
+                    const allWithHealth = [...animals, ...equipment];
+                    if (allWithHealth.length === 0) return 'N/A';
+                    const avgHealth = allWithHealth.reduce((sum, r) => sum + (r.health || 0), 0) / allWithHealth.length;
+                    return `${Math.round(avgHealth)}%`;
+                  })()}
+                </p>
+                <p className="text-xs text-blue-600">overall health</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-blue-800">
-                {(() => {
-                  const animals = resources.filter(r => r.type === 'animal' && r.health !== undefined);
-                  const equipment = resources.filter(r => r.type === 'equipment' && r.health !== undefined);
-                  const allWithHealth = [...animals, ...equipment];
-                  if (allWithHealth.length === 0) return 'N/A';
-                  const avgHealth = allWithHealth.reduce((sum, r) => sum + (r.health || 0), 0) / allWithHealth.length;
-                  return `${Math.round(avgHealth)}%`;
-                })()}
-              </p>
-              <p className="text-xs text-blue-600">animals & equipment</p>
-            </div>
-          </div>
 
-          {/* Activity Summary */}
-          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-            <div>
-              <p className="text-sm font-medium text-purple-800">Recent Activity</p>
-              <p className="text-xs text-purple-600">Tasks this week</p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-purple-800">
-                {(() => {
-                  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                  return tasks.filter(task => task.ts >= oneWeekAgo).length;
-                })()}
-              </p>
-              <p className="text-xs text-purple-600">tasks logged</p>
+            {/* Activity Summary */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-purple-800">Recent Activity</p>
+                  <p className="text-xs text-purple-600">Tasks this week</p>
+                </div>
+                <div className="text-2xl">⚡</div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-purple-800 mb-1">
+                  {(() => {
+                    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                    return tasks.filter(task => task.ts >= oneWeekAgo).length;
+                  })()}
+                </p>
+                <p className="text-xs text-purple-600">tasks logged</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 // Helper function to get emoji for task type
 const getTaskTypeEmoji = (type: string): string => {

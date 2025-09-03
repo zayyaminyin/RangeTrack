@@ -261,10 +261,11 @@ function AppContent() {
   // Show loading screen while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2Icon className="animate-spin h-8 w-8 text-green-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <div className="text-6xl mb-4">🌾</div>
+          <Loader2Icon className="animate-spin h-10 w-10 text-primary-600 mx-auto mb-4" />
+          <p className="text-primary-700 font-medium">Loading RangeTrack...</p>
         </div>
       </div>
     );
@@ -278,10 +279,11 @@ function AppContent() {
   // Show loading screen while loading user data
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2Icon className="animate-spin h-8 w-8 text-green-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading your farm data...</p>
+          <div className="text-6xl mb-4">🚜</div>
+          <Loader2Icon className="animate-spin h-10 w-10 text-primary-600 mx-auto mb-4" />
+          <p className="text-primary-700 font-medium">Loading your farm data...</p>
         </div>
       </div>
     );
@@ -290,27 +292,30 @@ function AppContent() {
   // Show error screen if there's an error
   if (error) {
     return (
-      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p className="font-medium">Error Loading Farm Data</p>
-            <p className="text-sm">{error}</p>
+          <div className="text-6xl mb-6">⚠️</div>
+          <div className="card shadow-lg p-6">
+            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg mb-6">
+              <p className="font-semibold mb-2">Error Loading Farm Data</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <button 
+              onClick={loadUserData}
+              className="btn-primary w-full py-3 font-semibold"
+            >
+              Try Again
+            </button>
           </div>
-          <button 
-            onClick={loadUserData}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     );
   }
   return (
     <Router>
-      <div className="min-h-screen bg-amber-50 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 flex flex-col">
         <Navbar />
-        <main className="flex-grow p-4 container mx-auto max-w-md md:max-w-2xl lg:max-w-4xl">
+        <main className="flex-grow p-4 container mx-auto max-w-md md:max-w-2xl lg:max-w-5xl">
           <Routes>
             <Route path="/" element={<Dashboard tasks={tasks} resources={resources} onCompleteTask={completeTask} />} />
             <Route path="/task/add" element={<AddTask onAddTask={addTask} resources={resources} />} />

@@ -78,110 +78,122 @@ export const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-green-800 text-white">
-        <div className="container mx-auto px-4 py-3">
+      <nav className="bg-primary-800 text-white shadow-lg">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <Link to="/" className="font-bold text-xl">
-              RangeTrack
+            <Link to="/" className="font-bold text-2xl tracking-tight hover:text-primary-100 transition-colors duration-200">
+              🌾 RangeTrack
             </Link>
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-2">
               {navItems.map(item => (
                 <Link 
                   key={item.path} 
                   to={item.path} 
-                  className={`px-3 py-2 rounded-md ${location.pathname === item.path ? 'bg-green-700' : 'hover:bg-green-700'}`}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    location.pathname === item.path 
+                      ? 'bg-primary-700 text-white shadow-md' 
+                      : 'hover:bg-primary-700 hover:shadow-md text-primary-100 hover:text-white'
+                  }`}
                 >
-                  {item.label}
+                  {item.icon}
+                  <span>{item.label}</span>
                 </Link>
               ))}
               
-              {/* Logout Button */}
-              <button
-                onClick={handleSignOut}
-                className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-red-700 bg-red-600 text-white"
-                title="Sign Out"
-              >
-                <LogOutIcon size={16} />
-                <span className="text-sm">Logout</span>
-              </button>
-              
               {/* User Menu */}
-              <div className="relative">
+              <div className="relative ml-4">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-green-700"
+                  className="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-primary-700 transition-all duration-200 bg-primary-700/50 backdrop-blur-sm"
                 >
-                  <UserIcon size={16} />
-                  <span className="text-sm">{user?.name}</span>
-                  <ChevronDownIcon size={16} />
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                    <UserIcon size={16} />
+                  </div>
+                  <div className="text-left hidden lg:block">
+                    <p className="text-sm font-medium text-white">{user?.name}</p>
+                    <p className="text-xs text-primary-200">{user?.location || 'Farm Owner'}</p>
+                  </div>
+                  <ChevronDownIcon size={16} className="text-primary-200" />
                 </button>
                 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-20">
+                  <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-xl py-2 z-20 border border-gray-100 animate-fade-in">
                     {!showProfileEdit ? (
                       <>
-                        <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                          <p className="font-medium">{user?.name}</p>
-                          <p className="text-gray-500">{user?.email}</p>
-                          <p className="text-gray-500">{user?.location}</p>
+                        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-primary-100">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white">
+                              <UserIcon size={18} />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-800">{user?.name}</p>
+                              <p className="text-sm text-gray-600">{user?.email}</p>
+                              {user?.location && <p className="text-xs text-gray-500 mt-1">📍 {user?.location}</p>}
+                            </div>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setProfileData({ name: user?.name || '', location: user?.location || '' });
-                            setShowProfileEdit(true);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                        >
-                          <EditIcon size={16} className="mr-2" />
-                          Edit Profile
-                        </button>
-                        <button
-                          onClick={handleSignOut}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                        >
-                          <LogOutIcon size={16} className="mr-2" />
-                          Sign Out
-                        </button>
+                        <div className="py-2">
+                          <button
+                            onClick={() => {
+                              setProfileData({ name: user?.name || '', location: user?.location || '' });
+                              setShowProfileEdit(true);
+                            }}
+                            className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center transition-colors duration-200"
+                          >
+                            <EditIcon size={16} className="mr-3 text-primary-600" />
+                            <span className="font-medium">Edit Profile</span>
+                          </button>
+                          <button
+                            onClick={handleSignOut}
+                            className="w-full text-left px-6 py-3 text-sm text-red-700 hover:bg-red-50 flex items-center transition-colors duration-200"
+                          >
+                            <LogOutIcon size={16} className="mr-3 text-red-600" />
+                            <span className="font-medium">Sign Out</span>
+                          </button>
+                        </div>
                       </>
                     ) : (
-                      <div className="p-4">
-                        <h3 className="font-medium text-gray-900 mb-3">Edit Profile</h3>
-                        <div className="space-y-3">
+                      <div className="p-6">
+                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                          <EditIcon size={16} className="mr-2 text-primary-600" />
+                          Edit Profile
+                        </h3>
+                        <div className="space-y-4">
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
                               Name
                             </label>
                             <input
                               type="text"
                               value={profileData.name}
                               onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-500"
+                              className="input-field text-sm"
                               placeholder="Your name"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
                               Farm Location
                             </label>
                             <input
                               type="text"
                               value={profileData.location}
                               onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-500"
+                              className="input-field text-sm"
                               placeholder="Your farm location"
                             />
                           </div>
-                          <div className="flex space-x-2 pt-2">
+                          <div className="flex space-x-3 pt-2">
                             <button
                               onClick={handleProfileUpdate}
                               disabled={updating}
-                              className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs py-1 px-2 rounded"
+                              className="btn-primary flex-1 text-sm py-2 disabled:opacity-50"
                             >
-                              {updating ? 'Saving...' : 'Save'}
+                              {updating ? 'Saving...' : 'Save Changes'}
                             </button>
                             <button
                               onClick={() => setShowProfileEdit(false)}
-                              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs py-1 px-2 rounded"
+                              className="btn-secondary flex-1 text-sm py-2"
                             >
                               Cancel
                             </button>
@@ -198,43 +210,54 @@ export const Navbar = () => {
       </nav>
 
       {/* Mobile bottom navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-green-800 border-t border-green-700 z-50">
-        <div className="grid grid-cols-6 gap-1 p-2">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-800 border-t border-primary-700 z-50 shadow-2xl backdrop-blur-lg">
+        <div className="grid grid-cols-6 gap-1 p-3">
           {navItems.map(item => (
             <Link 
               key={item.path} 
               to={item.path} 
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-md transition-colors ${
+              className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all duration-200 ${
                 location.pathname === item.path 
-                  ? 'bg-green-700 text-white' 
-                  : 'text-green-100 hover:bg-green-700'
+                  ? 'bg-primary-600 text-white shadow-lg transform scale-105' 
+                  : 'text-primary-100 hover:bg-primary-700 hover:text-white active:scale-95'
               }`}
             >
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 mb-1">
                 {item.icon}
               </div>
-              <span className="text-xs mt-1 text-center leading-tight font-medium">
+              <span className="text-xs text-center leading-tight font-medium">
                 {item.label}
               </span>
             </Link>
           ))}
         </div>
         
-        {/* Mobile Logout Button - Separate row */}
-        <div className="border-t border-green-700 p-2">
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
-            title="Sign Out"
-          >
-            <LogOutIcon size={18} />
-            <span className="text-sm font-medium">Logout</span>
-          </button>
+        {/* Mobile User Profile - Separate row */}
+        <div className="border-t border-primary-700 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 text-primary-100">
+              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                <UserIcon size={16} />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{user?.name}</p>
+                {user?.location && <p className="text-xs text-primary-200">📍 {user?.location}</p>}
+              </div>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center space-x-2 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+              title="Sign Out"
+            >
+              <LogOutIcon size={16} />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Add bottom padding for mobile to account for fixed navigation */}
-      <div className="md:hidden h-24"></div>
+      <div className="md:hidden h-32"></div>
     </>
   );
 };
