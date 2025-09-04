@@ -107,6 +107,15 @@ export const Navbar = () => {
             <Link to="/" className="font-bold text-2xl tracking-tight hover:text-primary-100 transition-colors duration-200">
               🌾 RangeTrack {isDemoMode && <span className="text-xs font-normal ml-2 bg-blue-500 px-2 py-1 rounded">DEMO</span>}
             </Link>
+            
+            {/* Mobile logout button */}
+            <button
+              onClick={handleSignOut}
+              className="md:hidden p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
+              title="Sign Out"
+            >
+              <LogOutIcon size={16} />
+            </button>
             <div className="hidden md:flex items-center space-x-2">
               {navItems.map(item => (
                 <Link 
@@ -246,62 +255,32 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile bottom navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-800 border-t border-primary-700 z-50 shadow-2xl backdrop-blur-lg">
-        <div className="grid grid-cols-6 gap-1 p-3">
+      {/* Mobile bottom navigation - Compact single row */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-800 border-t border-primary-700 z-50 shadow-lg">
+        <div className="grid grid-cols-6 gap-0 p-2">
           {navItems.map(item => (
             <Link 
               key={item.path} 
               to={item.path} 
-              className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200 ${
                 location.pathname === item.path 
-                  ? 'bg-primary-600 text-white shadow-lg transform scale-105' 
-                  : 'text-primary-100 hover:bg-primary-700 hover:text-white active:scale-95'
+                  ? 'bg-primary-600 text-white' 
+                  : 'text-primary-100 hover:bg-primary-700 hover:text-white'
               }`}
             >
               <div className="flex-shrink-0 mb-1">
-                {item.icon}
+                {React.cloneElement(item.icon as React.ReactElement, { size: 18 })}
               </div>
-              <span className="text-xs text-center leading-tight font-medium">
+              <span className="text-[10px] text-center leading-tight font-medium">
                 {item.label}
               </span>
             </Link>
           ))}
         </div>
-        
-        {/* Mobile User Profile - Separate row */}
-        <div className="border-t border-primary-700 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 text-primary-100">
-              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <UserIcon size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-medium">
-                  {isDemoMode ? demoUser.name : user?.name}
-                  {isDemoMode && <span className="text-xs ml-1 text-blue-200">(Demo)</span>}
-                </p>
-                {(isDemoMode ? demoUser.location : user?.location) && (
-                  <p className="text-xs text-primary-200">
-                    📍 {isDemoMode ? demoUser.location : user?.location}
-                  </p>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center space-x-2 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-              title="Sign Out"
-            >
-              <LogOutIcon size={16} />
-              <span className="text-sm font-medium">Logout</span>
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Add bottom padding for mobile to account for fixed navigation */}
-      <div className="md:hidden h-32"></div>
+      <div className="md:hidden h-16"></div>
     </>
   );
 };
