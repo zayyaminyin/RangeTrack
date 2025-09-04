@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { DemoProvider, useDemo } from './context/DemoContext';
 import { AuthPage } from './components/Auth/AuthPage';
 import { Navbar } from './components/Layout/Navbar';
 import { Footer } from './components/Layout/Footer';
@@ -13,6 +14,7 @@ import { History } from './components/History/History';
 import { ProfileSettings } from './components/Auth/ProfileSettings';
 import { Schedule } from './components/Schedule/Schedule';
 import { Collaborators } from './components/Collaborators/Collaborators';
+import { AIAssistant } from './components/AI/AIAssistant';
 import { dataService } from './lib/dataService';
 import { Database } from './lib/supabase';
 import { checkAwards } from './utils/awards';
@@ -23,23 +25,30 @@ type Task = Database['public']['Tables']['tasks']['Row'];
 type Award = Database['public']['Tables']['awards']['Row'];
 function AppContent() {
   const { user, loading } = useAuth();
+  const { isDemoMode, demoUser, demoResources, demoTasks, demoAwards } = useDemo();
   const [resources, setResources] = useState<Resource[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [awards, setAwards] = useState<Award[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user data when user is authenticated
+  // Load user data when user is authenticated or in demo mode
   useEffect(() => {
-    if (user) {
+    if (user && !isDemoMode) {
       loadUserData();
+    } else if (isDemoMode) {
+      // Use demo data
+      setResources([]);
+      setTasks([]);
+      setAwards([]);
+      setDataLoading(false);
     } else {
       setResources([]);
       setTasks([]);
       setAwards([]);
       setDataLoading(false);
     }
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const loadUserData = async () => {
     if (!user) return;
@@ -271,8 +280,8 @@ function AppContent() {
     );
   }
 
-  // Show authentication page if user is not authenticated
-  if (!user) {
+  // Show authentication page if user is not authenticated and not in demo mode
+  if (!user && !isDemoMode) {
     return <AuthPage />;
   }
 
@@ -317,13 +326,50 @@ function AppContent() {
         <Navbar />
         <main className="flex-grow p-4 container mx-auto max-w-md md:max-w-2xl lg:max-w-5xl">
           <Routes>
-            <Route path="/" element={<Dashboard tasks={tasks} resources={resources} onCompleteTask={completeTask} />} />
-            <Route path="/task/add" element={<AddTask onAddTask={addTask} resources={resources} />} />
-            <Route path="/resources" element={<ResourceManager resources={resources} onAddResource={addResource} onUpdateResource={updateResource} onDeleteResource={deleteResource} />} />
-            <Route path="/schedule" element={<Schedule tasks={tasks} onAddTask={addTask} />} />
+            <Route path="/" element={
+              <Dashboard 
+                tasks={isDemoMode ? demoTasks : tasks} 
+                resources={isDemoMode ? demoResources : resources} 
+                onCompleteTask={completeTask} 
+              />
+            } />
+            <Route path="/task/add" element={
+              <AddTask 
+                onAddTask={addTask} 
+                resources={isDemoMode ? demoResources : resources} 
+              />
+            } />
+            <Route path="/resources" element={
+              <ResourceManager 
+                resources={isDemoMode ? demoResources : resources} 
+                onAddResource={addResource} 
+                onUpdateResource={updateResource} 
+                onDeleteResource={deleteResource} 
+              />
+            } />
+            <Route path="/schedule" element={
+              <Schedule 
+                tasks={isDemoMode ? demoTasks : tasks} 
+                onAddTask={addTask} 
+              />
+            } />
             <Route path="/collaborators" element={<Collaborators />} />
-            <Route path="/insights" element={<Insights tasks={tasks} resources={resources} awards={awards} />} />
-            <Route path="/history" element={<History tasks={tasks} />} />
+            <Route path="/insights" element={
+              <Insights 
+                tasks={isDemoMode ? demoTasks : tasks} 
+                resources={isDemoMode ? demoResources : resources} 
+                awards={isDemoMode ? demoAwards : awards} 
+              />
+            } />
+            <Route path="/history" element={
+              <History tasks={isDemoMode ? demoTasks : tasks} />
+            } />
+            <Route path="/ai" element={
+              <AIAssistant 
+                tasks={isDemoMode ? demoTasks : tasks} 
+                resources={isDemoMode ? demoResources : resources} 
+              />
+            } />
             <Route path="/profile" element={<ProfileSettings />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
@@ -338,7 +384,9 @@ export function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <AppContent />
+        <DemoProvider>
+          <AppContent />
+        </DemoProvider>
       </ToastProvider>
     </AuthProvider>
   );

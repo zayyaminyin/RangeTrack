@@ -33,28 +33,28 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
     count: totalCounts.animal,
     propertyValue: animalHealth,
     propertyLabel: 'Health',
-    icon: <BirdIcon className="text-amber-600" size={20} />
+    icon: <BirdIcon className="text-primary-600" size={20} />
   }, {
     type: 'field' as ResourceType,
     label: 'Fields',
     count: totalCounts.field,
     propertyValue: fieldFertility,
     propertyLabel: 'Fertility',
-    icon: <TreesIcon className="text-green-600" size={20} />
+    icon: <TreesIcon className="text-primary-600" size={20} />
   }, {
     type: 'equipment' as ResourceType,
     label: 'Equipment',
     count: totalCounts.equipment,
     propertyValue: equipmentCondition,
     propertyLabel: 'Condition',
-    icon: <TractorIcon className="text-yellow-600" size={20} />
+    icon: <TractorIcon className="text-primary-600" size={20} />
   }, {
     type: 'feed' as ResourceType,
     label: 'Feed',
     count: totalCounts.feed,
     propertyValue: feedQuality,
     propertyLabel: 'Quality',
-    icon: <WheatIcon className="text-amber-600" size={20} />
+    icon: <WheatIcon className="text-primary-600" size={20} />
   }];
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -62,7 +62,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
         <div key={card.type} className="card shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
           <div className="card-body p-4">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-100">
                 {card.icon}
               </div>
               <div className="text-right">
@@ -105,13 +105,13 @@ const calculateAverageHealth = (resources: Resource[]): number | undefined => {
 // Helper function to get health indicator color
 const getHealthColor = (health: number): string => {
   if (health >= 80) return 'bg-primary-500';
-  if (health >= 60) return 'bg-accent-500';
+  if (health >= 60) return 'bg-gray-400';
   return 'bg-red-500';
 };
 
 // Helper function to get health text color
 const getHealthColorText = (health: number): string => {
   if (health >= 80) return 'text-primary-600';
-  if (health >= 60) return 'text-accent-600';
+  if (health >= 60) return 'text-gray-600';
   return 'text-red-600';
 };

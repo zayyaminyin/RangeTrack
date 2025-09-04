@@ -28,6 +28,7 @@ const getErrorMessage = (error: any): string => {
   
   // Debug: Log the actual error message to see what we're getting
   console.log('Auth error received:', message)
+  console.log('Full error object:', error)
   
   // Common Supabase auth errors - check multiple variations
   if (message.includes('Invalid login credentials') || 
@@ -42,8 +43,12 @@ const getErrorMessage = (error: any): string => {
       message.includes('Incorrect email or password') ||
       message.includes('incorrect email or password') ||
       message.includes('Invalid email/password') ||
-      message.includes('invalid email/password')) {
-    return 'Invalid email or password. Please check your credentials and try again.'
+      message.includes('invalid email/password') ||
+      message.includes('Authentication failed') ||
+      message.includes('authentication failed') ||
+      message.includes('Login failed') ||
+      message.includes('login failed')) {
+    return '❌ Invalid email or password. Please double-check your credentials. If you don\'t have an account, click "Sign up" below to create one.'
   }
   
   if (message.includes('Email not confirmed') || 
@@ -96,8 +101,10 @@ const getErrorMessage = (error: any): string => {
       message.includes('No user found') ||
       message.includes('no user found') ||
       message.includes('Account not found') ||
-      message.includes('account not found')) {
-    return 'No account found with this email address. Please check your email or create a new account.'
+      message.includes('account not found') ||
+      message.includes('User does not exist') ||
+      message.includes('user does not exist')) {
+    return '👤 No account found with this email address. Please check your email spelling or click "Sign up" below to create a new account.'
   }
   
   // Check for specific Supabase error codes

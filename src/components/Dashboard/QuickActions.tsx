@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircleIcon, ListPlusIcon, CalendarPlusIcon, BarChartIcon, UsersIcon } from 'lucide-react';
+import { PlusCircleIcon, ListPlusIcon, CalendarPlusIcon, BarChartIcon, UsersIcon, Brain } from 'lucide-react';
 export const QuickActions: React.FC = () => {
   const actions = [{
     name: 'Add Task',
@@ -22,8 +22,12 @@ export const QuickActions: React.FC = () => {
     name: 'Reports',
     icon: <BarChartIcon size={20} className="text-white" />,
     link: '/insights'
+  }, {
+    name: 'Ask\nFarmAI',
+    icon: <Brain size={20} className="text-white" />,
+    link: '/ai'
   }];
-  return <div className="grid grid-cols-5 gap-2">
+  return <div className="grid grid-cols-6 gap-2">
       {actions.map((action, index) => <Link key={index} to={action.link} className="flex flex-col items-center">
           <div className="w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 flex items-center justify-center mb-1">
             {action.icon}

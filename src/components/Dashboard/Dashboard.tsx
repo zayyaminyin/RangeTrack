@@ -61,7 +61,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Weather Widget - Enhanced */}
       <div className="card shadow-md hover:shadow-lg transition-shadow duration-200">
-        <div className="p-6 flex items-center justify-between bg-gradient-to-r from-blue-50 to-primary-50 backdrop-blur-sm">
+        <div className="p-6 flex items-center justify-between bg-gray-50">
           <div className="flex items-center">
             <div className="text-4xl mr-4">{getWeatherIcon()}</div>
             <div>
@@ -101,6 +101,103 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Quick Actions */}
       <QuickActions />
+
+      {/* AI Smart Recommendations */}
+      <div className="card shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="card-header">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl">🤖</div>
+              <h2 className="font-semibold text-gray-800">FarmAI Recommendations</h2>
+            </div>
+            <Link to="/ai" className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200">
+              Ask FarmAI →
+            </Link>
+          </div>
+        </div>
+        <div className="card-body">
+          <div className="space-y-3">
+            {(() => {
+              const recommendations = [];
+              
+              // Feed recommendation
+              if (feedDaysRemaining <= 7) {
+                recommendations.push({
+                  icon: '🌾',
+                  text: `Your feed supply is low (${feedDaysRemaining} days left). Consider ordering more feed or ask me about feed alternatives.`,
+                  priority: 'high'
+                });
+              }
+              
+              // Health check recommendation
+              const lowHealthResources = resources.filter(r => r.health && r.health < 80);
+              if (lowHealthResources.length > 0) {
+                recommendations.push({
+                  icon: '🏥',
+                  text: `${lowHealthResources.length} resource(s) show health concerns. Ask me about care recommendations.`,
+                  priority: 'medium'
+                });
+              }
+              
+              // Weather-based recommendation
+              recommendations.push({
+                icon: '🌤️',
+                text: 'Based on today\'s weather, ask me about optimal timing for outdoor tasks.',
+                priority: 'low'
+              });
+              
+              // Task optimization
+              const incompleteTasks = tasks.filter(t => !t.completed);
+              if (incompleteTasks.length > 5) {
+                recommendations.push({
+                  icon: '📋',
+                  text: `You have ${incompleteTasks.length} pending tasks. Ask me to help prioritize your workload.`,
+                  priority: 'medium'
+                });
+              }
+              
+              // Equipment maintenance
+              const equipment = resources.filter(r => r.type === 'equipment');
+              if (equipment.length > 0) {
+                recommendations.push({
+                  icon: '🔧',
+                  text: 'Ask me about seasonal maintenance schedules for your equipment.',
+                  priority: 'low'
+                });
+              }
+              
+              // Default recommendation if no specific ones
+              if (recommendations.length === 0) {
+                recommendations.push({
+                  icon: '💡',
+                  text: 'Ask me anything about farming best practices, animal care, or equipment maintenance!',
+                  priority: 'low'
+                });
+              }
+              
+              return recommendations.slice(0, 2); // Show max 2 recommendations
+            })().map((rec, index) => (
+              <div key={index} className={`p-3 rounded-lg border-l-4 ${
+                rec.priority === 'high' ? 'bg-red-50 border-red-400' :
+                rec.priority === 'medium' ? 'bg-amber-50 border-amber-400' :
+                'bg-gray-50 border-gray-300'
+              }`}>
+                <div className="flex items-start space-x-3">
+                  <span className="text-lg">{rec.icon}</span>
+                  <p className="text-sm text-gray-700 flex-1">{rec.text}</p>
+                </div>
+              </div>
+            ))}
+            
+            <Link 
+              to="/ai" 
+              className="block w-full text-center bg-primary-100 hover:bg-primary-200 text-primary-800 py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
+            >
+              🧠 Chat with FarmAI Assistant
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* Task Completion Progress */}
       <div className="card shadow-md hover:shadow-lg transition-shadow duration-200">
@@ -229,7 +326,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Quick Analytics Summary */}
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Task Completion Rate */}
-            <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-primary-50 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <p className="text-sm font-semibold text-primary-800">Task Completion</p>
@@ -263,35 +360,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Feed Status */}
-            <div className="bg-gradient-to-r from-accent-50 to-accent-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <p className="text-sm font-semibold text-accent-800">Feed Inventory</p>
-                  <p className="text-xs text-accent-600">Days remaining</p>
+                  <p className="text-sm font-semibold text-gray-800">Feed Inventory</p>
+                  <p className="text-xs text-gray-600">Days remaining</p>
                 </div>
                 <div className="text-2xl">🌾</div>
               </div>
               <div className="text-right">
                 <p className={`text-2xl font-bold mb-1 ${
-                  feedDaysRemaining <= 7 ? 'text-red-600' : 'text-accent-800'
+                  feedDaysRemaining <= 7 ? 'text-red-600' : 'text-gray-800'
                 }`}>
                   {feedDaysRemaining}
                 </p>
-                <p className="text-xs text-accent-600">days left</p>
+                <p className="text-xs text-gray-600">days left</p>
               </div>
             </div>
 
             {/* Resource Health */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <p className="text-sm font-semibold text-blue-800">Resource Health</p>
-                  <p className="text-xs text-blue-600">Average condition</p>
+                  <p className="text-sm font-semibold text-gray-800">Resource Health</p>
+                  <p className="text-xs text-gray-600">Average condition</p>
                 </div>
                 <div className="text-2xl">🏥</div>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-blue-800 mb-1">
+                <p className="text-2xl font-bold text-gray-800 mb-1">
                   {(() => {
                     const animals = resources.filter(r => r.type === 'animal' && r.health !== undefined);
                     const equipment = resources.filter(r => r.type === 'equipment' && r.health !== undefined);
@@ -301,27 +398,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     return `${Math.round(avgHealth)}%`;
                   })()}
                 </p>
-                <p className="text-xs text-blue-600">overall health</p>
+                <p className="text-xs text-gray-600">overall health</p>
               </div>
             </div>
 
             {/* Activity Summary */}
-            <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-primary-50 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <p className="text-sm font-semibold text-purple-800">Recent Activity</p>
-                  <p className="text-xs text-purple-600">Tasks this week</p>
+                  <p className="text-sm font-semibold text-primary-800">Recent Activity</p>
+                  <p className="text-xs text-primary-600">Tasks this week</p>
                 </div>
                 <div className="text-2xl">⚡</div>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-purple-800 mb-1">
+                <p className="text-2xl font-bold text-primary-800 mb-1">
                   {(() => {
                     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
                     return tasks.filter(task => task.ts >= oneWeekAgo).length;
                   })()}
                 </p>
-                <p className="text-xs text-purple-600">tasks logged</p>
+                <p className="text-xs text-primary-600">tasks logged</p>
               </div>
             </div>
           </div>

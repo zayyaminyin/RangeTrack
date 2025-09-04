@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, ClipboardListIcon, PackageIcon, AwardIcon, ClockIcon, LogOutIcon, UserIcon, ChevronDownIcon, EditIcon } from 'lucide-react';
+import { HomeIcon, ClipboardListIcon, PackageIcon, AwardIcon, ClockIcon, LogOutIcon, UserIcon, ChevronDownIcon, EditIcon, Brain, Eye, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useDemo } from '../../context/DemoContext';
 import { supabase } from '../../lib/supabase';
 
 export const Navbar = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { isDemoMode, demoUser, exitDemoMode } = useDemo();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    location: user?.location || ''
+    name: (isDemoMode ? demoUser.name : user?.name) || '',
+    location: (isDemoMode ? demoUser.location : user?.location) || ''
   });
   const [updating, setUpdating] = useState(false);
   
@@ -35,6 +37,10 @@ export const Navbar = () => {
     path: '/history',
     icon: <ClockIcon size={20} />,
     label: 'History'
+  }, {
+    path: '/ai',
+    icon: <Brain size={20} />,
+    label: 'FarmAI'
   }, {
     path: '/profile',
     icon: <UserIcon size={20} />,
@@ -78,11 +84,28 @@ export const Navbar = () => {
 
   return (
     <>
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="bg-blue-600 text-white py-2 px-4 text-center text-sm">
+          <div className="flex items-center justify-center space-x-2">
+            <Eye className="h-4 w-4" />
+            <span>Demo Mode - Exploring sample farm data</span>
+            <button 
+              onClick={exitDemoMode}
+              className="ml-4 text-blue-100 hover:text-white transition-colors duration-200"
+              title="Exit Demo Mode"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+      
       <nav className="bg-primary-800 text-white shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link to="/" className="font-bold text-2xl tracking-tight hover:text-primary-100 transition-colors duration-200">
-              🌾 RangeTrack
+              🌾 RangeTrack {isDemoMode && <span className="text-xs font-normal ml-2 bg-blue-500 px-2 py-1 rounded">DEMO</span>}
             </Link>
             <div className="hidden md:flex items-center space-x-2">
               {navItems.map(item => (
@@ -110,8 +133,13 @@ export const Navbar = () => {
                     <UserIcon size={16} />
                   </div>
                   <div className="text-left hidden lg:block">
-                    <p className="text-sm font-medium text-white">{user?.name}</p>
-                    <p className="text-xs text-primary-200">{user?.location || 'Farm Owner'}</p>
+                    <p className="text-sm font-medium text-white">
+                      {isDemoMode ? demoUser.name : user?.name}
+                      {isDemoMode && <span className="text-xs ml-1 text-blue-200">(Demo)</span>}
+                    </p>
+                    <p className="text-xs text-primary-200">
+                      {isDemoMode ? demoUser.location : (user?.location || 'Farm Owner')}
+                    </p>
                   </div>
                   <ChevronDownIcon size={16} className="text-primary-200" />
                 </button>
@@ -126,9 +154,18 @@ export const Navbar = () => {
                               <UserIcon size={18} />
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-800">{user?.name}</p>
-                              <p className="text-sm text-gray-600">{user?.email}</p>
-                              {user?.location && <p className="text-xs text-gray-500 mt-1">📍 {user?.location}</p>}
+                              <p className="font-semibold text-gray-800">
+                                {isDemoMode ? demoUser.name : user?.name}
+                                {isDemoMode && <span className="text-xs ml-1 text-blue-600">(Demo User)</span>}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {isDemoMode ? demoUser.email : user?.email}
+                              </p>
+                              {(isDemoMode ? demoUser.location : user?.location) && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  📍 {isDemoMode ? demoUser.location : user?.location}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -240,8 +277,15 @@ export const Navbar = () => {
                 <UserIcon size={16} />
               </div>
               <div>
-                <p className="text-sm font-medium">{user?.name}</p>
-                {user?.location && <p className="text-xs text-primary-200">📍 {user?.location}</p>}
+                <p className="text-sm font-medium">
+                  {isDemoMode ? demoUser.name : user?.name}
+                  {isDemoMode && <span className="text-xs ml-1 text-blue-200">(Demo)</span>}
+                </p>
+                {(isDemoMode ? demoUser.location : user?.location) && (
+                  <p className="text-xs text-primary-200">
+                    📍 {isDemoMode ? demoUser.location : user?.location}
+                  </p>
+                )}
               </div>
             </div>
             <button
