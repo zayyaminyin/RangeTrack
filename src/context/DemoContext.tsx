@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
-import { demoUser, demoResources, demoTasks, demoAwards, DemoTask, DemoResource, DemoAward } from '../lib/demoData'
+import { demoUser, demoResources, demoTasks, demoAwards, getDemoAwardsForFrontend, DemoTask, DemoResource, DemoAward } from '../lib/demoData'
 import { AuthUser } from '../lib/auth'
+import { Award } from '../types'
 
 interface DemoContextType {
   isDemoMode: boolean
   demoUser: AuthUser
   demoResources: DemoResource[]
   demoTasks: DemoTask[]
-  demoAwards: DemoAward[]
+  demoAwards: Award[]
   enterDemoMode: () => void
   exitDemoMode: () => void
   addDemoTask: (task: Omit<DemoTask, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void
@@ -103,7 +104,7 @@ export function DemoProvider({ children }: DemoProviderProps) {
     demoUser,
     demoResources: currentDemoResources,
     demoTasks: currentDemoTasks,
-    demoAwards,
+    demoAwards: getDemoAwardsForFrontend(),
     enterDemoMode,
     exitDemoMode,
     addDemoTask,

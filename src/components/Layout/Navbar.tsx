@@ -24,7 +24,7 @@ export const Navbar = () => {
   }, {
     path: '/task/add',
     icon: <ClipboardListIcon size={20} />,
-    label: 'Add Task'
+    label: 'Tasks'
   }, {
     path: '/resources',
     icon: <PackageIcon size={20} />,
@@ -255,23 +255,23 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile bottom navigation - Compact single row */}
+      {/* Mobile bottom navigation - Single row */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-800 border-t border-primary-700 z-50 shadow-lg">
-        <div className="grid grid-cols-6 gap-0 p-2">
+        <div className="grid grid-cols-7 gap-0 p-1">
           {navItems.map(item => (
             <Link 
               key={item.path} 
               to={item.path} 
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-md transition-all duration-200 ${
                 location.pathname === item.path 
                   ? 'bg-primary-600 text-white' 
                   : 'text-primary-100 hover:bg-primary-700 hover:text-white'
               }`}
             >
-              <div className="flex-shrink-0 mb-1">
-                {React.cloneElement(item.icon as React.ReactElement, { size: 18 })}
+              <div className="flex-shrink-0 mb-0.5">
+                {React.cloneElement(item.icon as React.ReactElement, { size: 16 })}
               </div>
-              <span className="text-[10px] text-center leading-tight font-medium">
+              <span className="text-[9px] text-center leading-tight font-medium">
                 {item.label}
               </span>
             </Link>

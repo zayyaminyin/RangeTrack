@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserPlusIcon, UsersIcon, MailIcon, XIcon, CheckIcon, ClockIcon, Loader2Icon } from 'lucide-react';
 import { dataService } from '../../lib/dataService';
 import { supabase } from '../../lib/supabase';
+import { useDemo } from '../../context/DemoContext';
 
 interface Collaborator {
   id: string;
@@ -23,6 +24,7 @@ interface Invitation {
 }
 
 export const Collaborators: React.FC = () => {
+  const { isDemoMode, demoUser } = useDemo();
   const [activeTab, setActiveTab] = useState<'team' | 'invitations'>('team');
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export const Collaborators: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [isDemoMode]);
 
   const loadData = async () => {
     setLoading(true);
@@ -46,7 +48,57 @@ export const Collaborators: React.FC = () => {
     try {
       console.log('🔍 Starting collaboration data load...');
       
-      // Step 1: Check if user is logged in
+      // Handle demo mode
+      if (isDemoMode) {
+        console.log('👥 Loading demo collaboration data...');
+        
+        // Demo collaborators data
+        const demoCollaborators: Collaborator[] = [
+          {
+            id: 'demo-collab-1',
+            email: demoUser.email,
+            name: demoUser.name,
+            role: 'owner',
+            status: 'active',
+            joined_at: '2024-08-15T10:00:00Z'
+          },
+          {
+            id: 'demo-collab-2',
+            email: 'mike.foreman@example.com',
+            name: 'Mike Foreman',
+            role: 'manager',
+            status: 'active',
+            joined_at: '2024-09-01T14:30:00Z'
+          },
+          {
+            id: 'demo-collab-3',
+            email: 'jenny.worker@example.com',
+            name: 'Jenny Martinez',
+            role: 'worker',
+            status: 'active',
+            joined_at: '2024-10-15T09:15:00Z'
+          }
+        ];
+
+        // Demo invitations data
+        const demoInvitations: Invitation[] = [
+          {
+            id: 'demo-invite-1',
+            email: 'new.farmer@example.com',
+            role: 'worker',
+            status: 'pending',
+            invited_at: '2025-01-01T12:00:00Z',
+            expires_at: '2025-01-08T12:00:00Z'
+          }
+        ];
+
+        setCollaborators(demoCollaborators);
+        setInvitations(demoInvitations);
+        setLoading(false);
+        return;
+      }
+      
+      // Step 1: Check if user is logged in (for real mode)
       const { data: { user } } = await supabase.auth.getUser();
       console.log('👤 User check:', user ? 'Logged in' : 'Not logged in');
       

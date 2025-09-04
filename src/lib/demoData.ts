@@ -468,7 +468,7 @@ export const demoTasks: DemoTask[] = [
   }
 ]
 
-// Demo awards for achievements
+// Demo awards for achievements  
 export const demoAwards: DemoAward[] = [
   {
     id: 'demo-award-1',
@@ -504,3 +504,13 @@ export const demoAwards: DemoAward[] = [
     updated_at: new Date(Date.now() - (10 * 24 * 60 * 60 * 1000)).toISOString()
   }
 ]
+
+// Convert demo awards to frontend Award format
+export const getDemoAwardsForFrontend = () => {
+  return demoAwards.map(award => ({
+    id: award.id,
+    label: award.title,
+    reason: award.description,
+    earned_ts: new Date(award.earned_at).getTime()
+  }));
+}
