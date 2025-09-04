@@ -5,7 +5,6 @@ import {
   NavigationIcon, 
   LayersIcon,
   SearchIcon,
-  FilterIcon,
   PlusIcon,
   EyeIcon
 } from 'lucide-react';
@@ -48,14 +47,6 @@ export const Map: React.FC<MapProps> = ({ resources }) => {
       description: '120 acres of premium corn field',
       status: 'active'
     },
-    {
-      id: 'field-3',
-      name: 'East Hay Field',
-      type: 'field',
-      coordinates: { lat: 40.7150, lng: -74.0040 },
-      description: '65 acres of timothy and alfalfa',
-      status: 'active'
-    },
     // Buildings
     {
       id: 'building-1',
@@ -63,14 +54,6 @@ export const Map: React.FC<MapProps> = ({ resources }) => {
       type: 'building',
       coordinates: { lat: 40.7135, lng: -74.0065 },
       description: 'Main storage and equipment barn',
-      status: 'active'
-    },
-    {
-      id: 'building-2',
-      name: 'Milking Parlor',
-      type: 'building',
-      coordinates: { lat: 40.7140, lng: -74.0070 },
-      description: '8-stall parallel milking parlor',
       status: 'active'
     },
     // Equipment
@@ -89,23 +72,6 @@ export const Map: React.FC<MapProps> = ({ resources }) => {
       type: 'water_source',
       coordinates: { lat: 40.7125, lng: -74.0055 },
       description: 'Primary water source for North Pasture',
-      status: 'active'
-    },
-    {
-      id: 'water-2',
-      name: 'South Water Station',
-      type: 'water_source',
-      coordinates: { lat: 40.7105, lng: -74.0075 },
-      description: 'Water station for South fields',
-      status: 'maintenance'
-    },
-    // Fences
-    {
-      id: 'fence-1',
-      name: 'Perimeter Fence',
-      type: 'fence',
-      coordinates: { lat: 40.7110, lng: -74.0050 },
-      description: 'Main perimeter fencing',
       status: 'active'
     }
   ];
@@ -216,8 +182,8 @@ export const Map: React.FC<MapProps> = ({ resources }) => {
                 <p className="text-gray-500 mb-4">
                   This would display an interactive map with your farm locations
                 </p>
-                <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto">
-                  {filteredLocations.slice(0, 4).map(location => (
+                <div className="grid grid-cols-1 gap-2 max-w-xs mx-auto">
+                  {filteredLocations.slice(0, 3).map(location => (
                     <div
                       key={location.id}
                       onClick={() => setSelectedLocation(location)}
