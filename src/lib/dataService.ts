@@ -372,7 +372,7 @@ export const dataService = {
   // Analytics and insights
   analytics: {
     // Get task completion statistics
-    async getTaskStats(userId: string, days: number = 30): Promise<{ data: any; error: string | null }> {
+    async getTaskStats(userId: string, days = 30): Promise<{ data: any; error: string | null }> {
       try {
         const endDate = new Date()
         const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000)

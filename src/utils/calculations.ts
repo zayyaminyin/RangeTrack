@@ -51,7 +51,7 @@ export const getTodaysTasks = (tasks: Task[]): Task[] => {
   });
 };
 // Get upcoming tasks for the next N days
-export const getUpcomingTasks = (tasks: Task[], days: number = 7): Task[] => {
+export const getUpcomingTasks = (tasks: Task[], days = 7): Task[] => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const endDate = new Date(today);
@@ -69,7 +69,7 @@ export const getTasksInRange = (tasks: Task[], startDate: Date, endDate: Date): 
   return tasks.filter(task => task.ts >= start && task.ts <= end);
 };
 // Calculate task completion rate for a given period
-export const calculateCompletionRate = (tasks: Task[], days: number = 7): number => {
+export const calculateCompletionRate = (tasks: Task[], days = 7): number => {
   const now = Date.now();
   const cutoff = now - days * 24 * 60 * 60 * 1000;
   const recentTasks = tasks.filter(task => task.ts >= cutoff);
@@ -78,7 +78,7 @@ export const calculateCompletionRate = (tasks: Task[], days: number = 7): number
   return completedTasks.length / recentTasks.length * 100;
 };
 // Calculate resource utilization (for equipment)
-export const calculateResourceUtilization = (tasks: Task[], resourceId: string, days: number = 30): number => {
+export const calculateResourceUtilization = (tasks: Task[], resourceId: string, days = 30): number => {
   const now = Date.now();
   const cutoff = now - days * 24 * 60 * 60 * 1000;
   // Count days when resource was used
@@ -92,7 +92,7 @@ export const calculateResourceUtilization = (tasks: Task[], resourceId: string, 
   return Math.round(usageDays.size / days * 100);
 };
 // Calculate animal health trend
-export const calculateHealthTrend = (tasks: Task[], animalId: string, days: number = 90): 'improving' | 'stable' | 'declining' | 'unknown' => {
+export const calculateHealthTrend = (tasks: Task[], animalId: string, days = 90): 'improving' | 'stable' | 'declining' | 'unknown' => {
   const now = Date.now();
   const cutoff = now - days * 24 * 60 * 60 * 1000;
   const healthTasks = tasks.filter(task => task.type === 'health_check' && task.resource_id === animalId && task.ts >= cutoff).sort((a, b) => a.ts - b.ts);

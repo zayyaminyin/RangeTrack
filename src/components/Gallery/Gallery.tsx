@@ -126,7 +126,7 @@ export const Gallery: React.FC<GalleryProps> = ({ tasks, resources }) => {
 
   // Enhanced filtering and sorting
   const filteredAndSortedImages = useMemo(() => {
-    let filtered = images.filter(image => {
+    const filtered = images.filter(image => {
       const matchesFilter = activeFilter === 'all' || image.type === activeFilter;
       const matchesSearch = searchQuery === '' || 
         image.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
